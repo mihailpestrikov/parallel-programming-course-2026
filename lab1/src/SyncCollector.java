@@ -4,6 +4,7 @@ final class SyncCollector implements MetricsCollector {
 
     @Override
     public synchronized void record(long value) {
+        // synchronized на this, snapshot() из другого потока  ждёт лока
         inner.record(value);
     }
 

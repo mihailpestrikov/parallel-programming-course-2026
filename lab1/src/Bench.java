@@ -54,38 +54,40 @@ public class Bench {
 
     static double run(MetricsCollector collector, long[] values, int threads, int seconds)
             throws InterruptedException {
-        CountDownLatch start = new CountDownLatch(1);
-        AtomicBoolean stop = new AtomicBoolean(false);
-        long[] ops = new long[threads];
+        CountDownLatch start = new CountDownLatch(1);   // общий стартовый сигнал
+        AtomicBoolean stop = new AtomicBoolean(false);   // общий сигнал остановки
+        long[] ops = new long[threads];                  // свой счётчик на поток, без гонок
         Thread[] workers = new Thread[threads];
 
         for (int k = 0; k < threads; k++) {
             int id = k;
             workers[k] = new Thread(() -> {
-                await(start);
+                await(start);                            // все ждут одного countDown()
                 ops[id] = workLoop(collector, values, id * 1000, stop);
             });
             workers[k].start();
         }
 
         long t0 = System.nanoTime();
-        start.countDown();
+        start.countDown();          // отпускаем всех разом - честный одновременный старт
         Thread.sleep(seconds * 1000L);
-        stop.set(true);
+        stop.set(true);              // просим воркеров остановиться
         long t1 = System.nanoTime();
         for (Thread w : workers) {
-            w.join();
+            w.join();                // ждём реального завершения перед подсчётом
         }
 
         long total = 0;
         for (long n : ops) {
-            total += n;
+            total += n;               // складываем после join - гонок уже нет
         }
         return total / ((t1 - t0) / 1e9);
     }
 
     static long workLoop(MetricsCollector collector, long[] values, int i, AtomicBoolean stop) {
         long local = 0;
+        // getOpaque - дешёвая проверка флага без полного барьера памяти,
+        // не даёт JIT закешировать stop в регистре и никогда не перечитывать
         while (!stop.getOpaque()) {
             collector.record(values[i]);
             local++;

@@ -28,10 +28,13 @@ final class ThreadLocalCollector implements MetricsCollector {
 
     @Override
     public void record(long value) {
+        // Каждый вызов record() всегда попадает в свой ThreadState,
+        // поэтому здесь нет гонки писателей, всегда ровно один и тот же поток
         ThreadState s = myState.get();
         int b = MetricsCollector.bucketOf(value);
 
         // Писатель один, поэтому без CAS читаем plain, пишем с release
+        // setRelease - защита от перестановок jit
         s.buckets.setRelease(b, s.buckets.getPlain(b) + 1);
         s.count.setRelease(s.count.getPlain() + 1);
         s.sum.setRelease(s.sum.getPlain() + value);
@@ -52,8 +55,14 @@ final class ThreadLocalCollector implements MetricsCollector {
         long sum = 0;
         long min = Long.MAX_VALUE;
         long max = 0;
+        // Обходим состояния всех потоков
+        // никакой блокировки писателей нет, поэтому сумма всегда потенциально рваная
         for (ThreadState s : states) {
             for (int i = 0; i < BUCKETS; i++) {
+                // get() у AtomicLongArray/AtomicLong full volatile-чтение
+                // синхронизируется с setRelease писателя
+                // берем конкретное значение bucket, видим и все записи, что были до него
+                // в потоке-писателе. но не гарантирует свежесть остальных полей
                 out[i] += s.buckets.get(i);
             }
             count += s.count.get();

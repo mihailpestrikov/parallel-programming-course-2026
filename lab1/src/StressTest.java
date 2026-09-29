@@ -28,6 +28,8 @@ public class StressTest {
     }
 
     static void checkSingleThreaded(String impl, long[] values) {
+        // без потоков вообще - проверяем, что логика коллектора верна сама по себе,
+        // до того как начнём искать проблемы именно от многопоточности
         MetricsCollector expected = new SingleThreadCollector();
         MetricsCollector actual = MetricsCollector.create(impl);
         for (long v : values) {
@@ -50,8 +52,8 @@ public class StressTest {
     static void runRound(String impl, long[] values, int round) throws InterruptedException {
         MetricsCollector collector = MetricsCollector.create(impl);
         AtomicBoolean stop = new AtomicBoolean(false);
-        CountDownLatch started = new CountDownLatch(WRITERS);
-        long[] calls = new long[WRITERS];
+        CountDownLatch started = new CountDownLatch(WRITERS);   // ждём, пока все реально стартанут
+        long[] calls = new long[WRITERS];   // сколько раз каждый писатель реально вызвал record()
         Thread[] writers = new Thread[WRITERS];
 
         for (int k = 0; k < WRITERS; k++) {
@@ -66,6 +68,7 @@ public class StressTest {
 
         int sumLess = 0;
         int sumMore = 0;
+        // Пока писатели пишут без остановки, дёргаем snapshot() и ловим рваные срезы
         for (int n = 0; n < SNAPSHOTS; n++) {
             Snapshot s = collector.snapshot();
             long bucketsSum = 0;
@@ -81,11 +84,11 @@ public class StressTest {
 
         stop.set(true);
         for (Thread w : writers) {
-            w.join();
+            w.join();               // все писатели точно закончили - гонок больше нет
         }
         long totalCalls = 0;
         for (long c : calls) {
-            totalCalls += c;
+            totalCalls += c;        // реальное число вызовов record(), независимо от коллектора
         }
 
         // Два снимка у этапа 4 так сливаются оба буфера, для остальных ничего не меняется

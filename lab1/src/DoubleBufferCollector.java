@@ -23,7 +23,7 @@ final class DoubleBufferCollector implements MetricsCollector {
 
     private volatile int active = 0;
 
-    private final Object snapLock = new Object();
+    private final Object listLock = new Object();
     private final List<ThreadBuffers> allBuffers = new ArrayList<>();
 
     private final long[] totalBuckets = new long[BUCKETS];
@@ -34,7 +34,7 @@ final class DoubleBufferCollector implements MetricsCollector {
 
     private final ThreadLocal<ThreadBuffers> myBuffers = ThreadLocal.withInitial(() -> {
         ThreadBuffers tb = new ThreadBuffers();
-        synchronized (snapLock) {
+        synchronized (listLock) {
             allBuffers.add(tb);
         }
         return tb;
@@ -46,40 +46,45 @@ final class DoubleBufferCollector implements MetricsCollector {
 
     @Override
     public void record(long value) {
+        // У каждого потока свой ThreadBuffers с двумя наборами полей
+        // пока читатель сливает буфер 0, писатель пишет в буфер 1
+        // так работает синк мапа в го
         ThreadBuffers my = myBuffers.get();
 
-        // Рукопожатие Деккера: set(b) и оба чтения active должны быть seq_cst.
         int b;
         while (true) {
-            b = active;                            // 1. какой буфер сейчас активен
-            my.inside.set(b);                      // 2. объявляем: пишу в b
-            if (!recheck || active == b) {         // 3. читатель не успел переключить active?
-                break;
+            b = active;                            // какой буфер сейчас активен
+            my.inside.set(b);                      // объявляем: пишу в b
+            if (!recheck || active == b) {         // читатель не успел переключить active?
+                break;                             // если синканулись с читалем, идем дальше
             }
-            my.inside.setRelease(NOWHERE);         // 4. успел: сбрасываем inside и повторяем
+            my.inside.setRelease(NOWHERE);         // успел сбрасываем inside и повторяем
         }
 
+        // буфер личный для потока
         my.buckets[b][MetricsCollector.bucketOf(value)]++;
         my.count[b]++;
         my.sum[b] += value;
         if (value < my.min[b]) my.min[b] = value;
         if (value > my.max[b]) my.max[b] = value;
 
-        // 5. вышли из буфера
+        // вышли из буфера, говорим читателю буфер b снова свободен для слияния
         my.inside.setRelease(NOWHERE);
     }
 
     @Override
     public Snapshot snapshot() {
-        synchronized (snapLock) {
+        synchronized (listLock) {
             int old = active;
             active = 1 - old;
 
             for (ThreadBuffers tb : allBuffers) {
+                // ждем пока писатель уйдет в другой буффер
                 while (tb.inside.get() == old) {
                     Thread.onSpinWait();
                 }
 
+                // в олд буфер никто не пишет, сливем данные
                 long[] frozen = tb.buckets[old];
                 for (int i = 0; i < BUCKETS; i++) {
                     totalBuckets[i] += frozen[i];
@@ -92,7 +97,7 @@ final class DoubleBufferCollector implements MetricsCollector {
                 Arrays.fill(frozen, 0);
                 tb.count[old] = 0;
                 tb.sum[old] = 0;
-                tb.min[old] = Long.MAX_VALUE; // не 0: иначе min навсегда останется равным 0
+                tb.min[old] = Long.MAX_VALUE;
                 tb.max[old] = 0;
             }
 

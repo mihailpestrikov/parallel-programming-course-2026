@@ -21,14 +21,16 @@ final class StripedCollector implements MetricsCollector {
     @Override
     public void record(long value) {
         int b = MetricsCollector.bucketOf(value);
+        // Лок берётся не на всю запись, а только на инкремент своей корзины
         synchronized (locks[b % STRIPES]) {
             buckets[b]++;
         }
 
+        // Сводка общая на все потоки и не под локом шарда
+        // поэтому защищаем каждое поле своим атомиком
         count.incrementAndGet();
         sum.addAndGet(value);
 
-        // Сначала сравниваем, потом CAS: если min не меняется, запись не нужна
         long cur = min.get();
         while (value < cur && !min.compareAndSet(cur, value)) {
             cur = min.get();
@@ -42,6 +44,10 @@ final class StripedCollector implements MetricsCollector {
     @Override
     public Snapshot snapshot() {
         long[] copy = new long[BUCKETS];
+        // Снимок берёт локи шардов по очереди, а не все разом. Из-за этого корзины
+        // с разных шардов в одном snapshot() могут быть сделаны в разные моменты
+        // времени, а sum/count независимо от корзин.
+        // Отсюда почти гарантированный sum(buckets) != count в стресс-тесте.
         for (int s = 0; s < STRIPES; s++) {
             synchronized (locks[s]) {
                 for (int b = s; b < BUCKETS; b += STRIPES) {
