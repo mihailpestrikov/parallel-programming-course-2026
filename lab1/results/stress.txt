@@ -1,0 +1,13 @@
+impl,round,broken_pct,sum_less,sum_more,final_diff
+striped,1,86.54,8480,174,0
+striped,2,89.70,8821,149,0
+striped,3,90.60,8661,399,0
+threadlocal,1,74.50,7300,150,0
+threadlocal,2,75.41,7365,176,0
+threadlocal,3,99.18,9913,5,0
+double,1,0.00,0,0,0
+double,2,0.00,0,0,0
+double,3,0.00,0,0,0
+double-norecheck,1,99.91,9983,8,-4
+double-norecheck,2,89.60,8960,0,-7
+double-norecheck,3,73.72,7336,36,32

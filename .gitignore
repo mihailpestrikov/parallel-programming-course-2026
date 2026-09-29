@@ -1,0 +1,14 @@
+# IDE
+.idea/
+*.iml
+
+# OS
+.DS_Store
+
+# Java build output
+out/
+*.class
+
+# Python venvs (plot.py и подобные скрипты)
+.venv/
+__pycache__/
