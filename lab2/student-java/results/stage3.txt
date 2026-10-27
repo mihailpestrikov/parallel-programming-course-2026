@@ -1,0 +1,18 @@
+$ ./lab2 withdraw-v1 randoms 1000
+random: 1000 seeds, 501 fail (50,1%)
+first failing seed 0: BBAABBAA -> OVERDRAFT balance=-100 results=true,true
+replay BBAABBAA: same failure 10/10
+
+$ ./lab2 withdraw-v1 replay BBAABBAA log
+  B  lock mu
+  B  unlock mu
+  B  window
+  A  lock mu
+  A  unlock mu
+  A  window
+  B  lock mu
+  B  unlock mu
+  A  lock mu
+  A  unlock mu
+schedule BBAABBAA -> OVERDRAFT balance=-100 results=true,true
+

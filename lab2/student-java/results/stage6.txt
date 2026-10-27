@@ -1,0 +1,55 @@
+$ ./lab2 collector-nostep3-1x1 dfs
+explored 106 schedules, 12 fail  (0,04 s)
+first failing: ABBBAABAAB -> LOST 1 record(s): counted 0 of 1
+
+$ ./lab2 collector-nostep3-1x1 replay ABBBAABAAB log
+  A  active -> 0
+  B  active -> 0
+  B  active = 1
+  B  await done
+  A  inside[W1] = 0
+  A  cnt[W1][0] -> 0
+  B  cnt[W1][0] -> 0
+  A  cnt[W1][0] = 1
+  A  inside[W1] = -1
+  B  cnt[W1][0] = 0
+schedule ABBBAABAAB -> LOST 1 record(s): counted 0 of 1
+
+$ ./lab2 collector-nostep3-1x2 dfs
+explored 1666 schedules, 105 fail  (0,33 s)
+first failing: AAAAAABBBAABAAB -> LOST 1 record(s): counted 1 of 2
+
+$ ./lab2 collector-nostep3-1x3 dfs
+explored 9931 schedules, 348 fail  (2,15 s)
+first failing: AAAAAAAAAAABBBAABAAB -> LOST 1 record(s): counted 2 of 3
+
+$ ./lab2 collector-nostep3-1x4 dfs
+explored 37151 schedules, 816 fail  (9,00 s)
+first failing: AAAAAAAAAAAAAAAABBBAABAAB -> LOST 1 record(s): counted 3 of 4
+
+$ ./lab2 collector-nostep3-2x1 bounded 0
+explored 6 schedules, 0 fail  (0,01 s)
+
+$ ./lab2 collector-nostep3-2x1 bounded 1
+explored 102 schedules, 0 fail  (0,05 s)
+
+$ ./lab2 collector-nostep3-2x1 bounded 2
+explored 945 schedules, 10 fail  (0,26 s)
+first failing: AAAAABCCCCCCCBBBBC -> LOST 1 record(s): counted 1 of 2
+
+$ ./lab2 collector-nostep3-2x1 bounded 3
+explored 5814 schedules, 108 fail  (1,36 s)
+first failing: AAAAABCCCCCCCBBBBC -> LOST 1 record(s): counted 1 of 2
+
+$ ./lab2 collector-plain-1x1 dfs
+explored 29 schedules, 0 fail  (0,02 s)
+
+$ ./lab2 collector-acqrel-1x1 dfs
+explored 636 schedules, 0 fail  (0,14 s)
+
+$ ./lab2 collector-ok-1x1 dfs
+explored 636 schedules, 0 fail  (0,14 s)
+
+$ ./lab2 collector-ok-2x1 bounded 2
+explored 1334 schedules, 0 fail  (0,37 s)
+

@@ -1,0 +1,51 @@
+$ ./lab2 withdraw-v1 bounded 0
+explored 2 schedules, 0 fail  (0,01 s)
+
+$ ./lab2 withdraw-v1 bounded 1
+explored 4 schedules, 2 fail  (0,01 s)
+first failing: AABBBBAA -> OVERDRAFT balance=-100 results=true,true
+
+$ ./lab2 withdraw-v1 replay AABBBBAA log
+  A  lock mu
+  A  unlock mu
+  A  window
+  B  lock mu
+  B  unlock mu
+  B  window
+  B  lock mu
+  B  unlock mu
+  A  lock mu
+  A  unlock mu
+schedule AABBBBAA -> OVERDRAFT balance=-100 results=true,true
+
+$ ./lab2 withdraw-v1 bounded 2
+explored 6 schedules, 4 fail  (0,01 s)
+first failing: AABBAABB -> OVERDRAFT balance=-100 results=true,true
+
+$ ./lab2 withdraw-v1 replay AABBAABB log
+  A  lock mu
+  A  unlock mu
+  A  window
+  B  lock mu
+  B  unlock mu
+  B  window
+  A  lock mu
+  A  unlock mu
+  B  lock mu
+  B  unlock mu
+schedule AABBAABB -> OVERDRAFT balance=-100 results=true,true
+
+$ ./lab2 transfer bounded 0
+explored 2 schedules, 0 fail  (0,01 s)
+
+$ ./lab2 transfer bounded 1
+explored 6 schedules, 2 fail  (0,01 s)
+first failing: AB -> DEADLOCK held={a:A, b:B}
+
+$ ./lab2 transfer replay AB log
+  A  lock a
+  A  window
+  B  lock b
+  B  window
+schedule AB -> DEADLOCK held={a:A, b:B}
+
