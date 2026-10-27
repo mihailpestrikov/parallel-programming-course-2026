@@ -1,0 +1,112 @@
+$ java -cp out lab2.MiniStress acqrel 200000 100
+mode=acqrel samples=20 000 000
+  (0,0)              0    0,000%  forbidden under seq_cst
+  (0,1)     10 158 334   50,792%
+  (1,0)      9 841 591   49,208%
+  (1,1)             75    0,000%
+
+$ java -cp out lab2.MiniStress acqrel 200 100000
+mode=acqrel samples=20 000 000
+  (0,0)              1    0,000%  forbidden under seq_cst
+  (0,1)      9 534 665   47,673%
+  (1,0)     10 465 315   52,327%
+  (1,1)             19    0,000%
+
+$ java -cp out lab2.MiniStress plain 2000 10000
+mode=plain samples=20 000 000
+  (0,0)            775    0,004%  forbidden under seq_cst
+  (0,1)     10 150 792   50,754%
+  (1,0)      9 848 425   49,242%
+  (1,1)              8    0,000%
+
+$ java -cp out lab2.MiniStress acqrel 2000 10000
+mode=acqrel samples=20 000 000
+  (0,0)             69    0,000%  forbidden under seq_cst
+  (0,1)      9 832 374   49,162%
+  (1,0)     10 167 449   50,837%
+  (1,1)            108    0,001%
+
+$ java -cp out lab2.MiniStress volatile 2000 10000
+mode=volatile samples=20 000 000
+  (0,0)              0    0,000%  forbidden under seq_cst
+  (0,1)     10 051 817   50,259%
+  (1,0)      9 932 112   49,661%
+  (1,1)         16 071    0,080%
+
+$ java -cp out lab2.MiniStress naive 200000 1
+mode=naive samples=200 000
+  (0,0)              0    0,000%  forbidden under seq_cst
+  (0,1)        107 089   53,545%
+  (1,0)         92 911   46,456%
+  (1,1)              0    0,000%
+
+$ java -cp out lab2.MiniStress plain 2000 10000
+mode=plain samples=20 000 000
+  (0,0)            872    0,004%  forbidden under seq_cst
+  (0,1)     10 179 472   50,897%
+  (1,0)      9 819 641   49,098%
+  (1,1)             15    0,000%
+
+$ java -cp out lab2.MiniStress acqrel 2000 10000
+mode=acqrel samples=20 000 000
+  (0,0)              0    0,000%  forbidden under seq_cst
+  (0,1)     10 015 803   50,079%
+  (1,0)      9 983 713   49,919%
+  (1,1)            484    0,002%
+
+$ java -cp out lab2.MiniStress volatile 2000 10000
+mode=volatile samples=20 000 000
+  (0,0)              0    0,000%  forbidden under seq_cst
+  (0,1)      9 961 395   49,807%
+  (1,0)     10 028 335   50,142%
+  (1,1)         10 270    0,051%
+
+$ java -cp out lab2.MiniStress naive 200000 1
+mode=naive samples=200 000
+  (0,0)              0    0,000%  forbidden under seq_cst
+  (0,1)        108 384   54,192%
+  (1,0)         91 616   45,808%
+  (1,1)              0    0,000%
+
+$ java -cp out lab2.MiniStress plain 2000 10000
+mode=plain samples=20 000 000
+  (0,0)          1 013    0,005%  forbidden under seq_cst
+  (0,1)     10 175 899   50,879%
+  (1,0)      9 823 038   49,115%
+  (1,1)             50    0,000%
+
+$ java -cp out lab2.MiniStress acqrel 2000 10000
+mode=acqrel samples=20 000 000
+  (0,0)              0    0,000%  forbidden under seq_cst
+  (0,1)      9 973 808   49,869%
+  (1,0)     10 026 060   50,130%
+  (1,1)            132    0,001%
+
+$ java -cp out lab2.MiniStress volatile 2000 10000
+mode=volatile samples=20 000 000
+  (0,0)              0    0,000%  forbidden under seq_cst
+  (0,1)      9 993 402   49,967%
+  (1,0)      9 998 195   49,991%
+  (1,1)          8 403    0,042%
+
+$ java -cp out lab2.MiniStress naive 200000 1
+mode=naive samples=200 000
+  (0,0)              0    0,000%  forbidden under seq_cst
+  (0,1)        100 025   50,013%
+  (1,0)         99 975   49,988%
+  (1,1)              0    0,000%
+
+$ java -cp out lab2.MiniStress plain 200000 100
+mode=plain samples=20 000 000
+  (0,0)              0    0,000%  forbidden under seq_cst
+  (0,1)      9 370 758   46,854%
+  (1,0)     10 629 242   53,146%
+  (1,1)              0    0,000%
+
+$ java -cp out lab2.MiniStress plain 200 100000
+mode=plain samples=20 000 000
+  (0,0)            497    0,002%  forbidden under seq_cst
+  (0,1)     10 518 102   52,591%
+  (1,0)      9 481 399   47,407%
+  (1,1)              2    0,000%
+

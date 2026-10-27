@@ -1,0 +1,30 @@
+$ ./lab2 withdraw-v0 first log
+  A  balance -> 100
+  A  window
+  A  balance -> 100
+  A  balance = 0
+  B  balance -> 0
+  B  window
+schedule AAAB -> ok
+
+$ ./lab2 withdraw-v1 first log
+  A  lock mu
+  A  unlock mu
+  A  window
+  A  lock mu
+  A  unlock mu
+  B  lock mu
+  B  unlock mu
+  B  window
+schedule AAAABB -> ok
+
+$ ./lab2 transfer first
+schedule AAAABBBB -> ok
+
+$ ./lab2 transfer replay AB log
+  A  lock a
+  A  window
+  B  lock b
+  B  window
+schedule AB -> DEADLOCK held={a:A, b:B}
+
